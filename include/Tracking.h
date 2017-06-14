@@ -155,8 +155,8 @@ protected:
     LoopClosing* mpLoopClosing;
 
     //ORB
-    ORBextractor* mpORBextractorLeft, *mpORBextractorRight;
-    ORBextractor* mpIniORBextractor;
+    TarsierExtractor* mpORBextractorLeft, *mpORBextractorRight;
+    TarsierExtractor* mpIniORBextractor;
 
     //BoW
     ORBVocabulary* mpORBVocabulary;
