@@ -12,7 +12,7 @@ namespace ORB_SLAM2 {
 	{}
 
     // Mask is ignored
-	void operator()(cv::InputArray image, cv::InputArray mask,
+	void TarsierExtractor::operator()(cv::InputArray image, cv::InputArray mask,
 		std::vector<cv::KeyPoint>& keypoints,
 		cv::OutputArray descriptors)
 	{
@@ -21,33 +21,33 @@ namespace ORB_SLAM2 {
 			return;
 		}
 
-		Mat image_matrix = image.getMat();
-		assert(image.type() == CV_8UC1);
+		cv::Mat image_matrix = image.getMat();
+		assert(image_matrix.type() == CV_8UC1);
 
-		cv::Size size = image.size();
-		if (image.isContinuous()){
-			size.width *= size.height();
+		cv::Size size = image_matrix.size();
+		if (image_matrix.isContinuous()){
+			size.width *= size.height;
 			size.height = 1;
 		}
 
-		vector<uint8_t> pixels;
+		std::vector<uint8_t> pixels;
 
 		for (int y = 0; y < size.height; y++){
-			uint8_t * src_ptr = image.ptr(y);
+			uint8_t * src_ptr = image_matrix.ptr(y);
 
 			pixels.insert(pixels.end(), src_ptr, src_ptr + size.width);
 		}
 
-		assert(pixels.size() == image.size().width * image.size().height);
+		assert(pixels.size() == image_matrix.size().width * image_matrix.size().height);
 
-		ImgData frame(image.size().width, image.size().height, std::move(pixels));
+		ImgData frame(image_matrix.size().width, image_matrix.size().height, std::move(pixels));
 
 		std::vector<feature_descriptor> output_features = dev.get_image_features(frame);
 
 		keypoints.clear();
-		descriptors = Mat::zeros((int)output_features.size(), 32, CV_8UC1);
+		descriptors.create(output_features.size(), 32, CV_8U);
 
-		for (int i = 0; i < output_features.size(); i++) {
+		for (uint32_t i = 0; i < output_features.size(); i++) {
 			auto feature = output_features[i];
 
 			keypoints.emplace_back(
@@ -55,13 +55,13 @@ namespace ORB_SLAM2 {
 				feature.y,
 				18, //size
 				-1, //angle
-				0 //response
+				0, //response
 				feature.level,
 				-1 //class id
 			);
 
 			//copy descriptor bytes
-			std::copy(feature.orb_descriptor_chunks, feature.orb_descriptor_chunks + 32, descriptors.ptr(i));
+			std::copy(feature.orb_descriptor_chunks, feature.orb_descriptor_chunks + 32, descriptors.getMat().ptr(i));
 		}
 	}
 }

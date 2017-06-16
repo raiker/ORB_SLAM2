@@ -24,7 +24,7 @@
 #include <vector>
 #include <list>
 #include <opencv/cv.h>
-
+#include "OrbExtractorBase.h"
 
 namespace ORB_SLAM2
 {
@@ -42,7 +42,7 @@ public:
     bool bNoMore;
 };
 
-class ORBextractor
+class ORBextractor : public OrbExtractorBase
 {
 public:
     
@@ -56,29 +56,29 @@ public:
     // Compute the ORB features and descriptors on an image.
     // ORB are dispersed on the image using an octree.
     // Mask is ignored in the current implementation.
-    void operator()( cv::InputArray image, cv::InputArray mask,
+    virtual void operator()( cv::InputArray image, cv::InputArray mask,
       std::vector<cv::KeyPoint>& keypoints,
       cv::OutputArray descriptors);
 
-    int inline GetLevels(){
+    virtual int inline GetLevels(){
         return nlevels;}
 
-    float inline GetScaleFactor(){
+    virtual float inline GetScaleFactor(){
         return scaleFactor;}
 
-    std::vector<float> inline GetScaleFactors(){
+    virtual std::vector<float> inline GetScaleFactors(){
         return mvScaleFactor;
     }
 
-    std::vector<float> inline GetInverseScaleFactors(){
+    virtual std::vector<float> inline GetInverseScaleFactors(){
         return mvInvScaleFactor;
     }
 
-    std::vector<float> inline GetScaleSigmaSquares(){
+    virtual std::vector<float> inline GetScaleSigmaSquares(){
         return mvLevelSigma2;
     }
 
-    std::vector<float> inline GetInverseScaleSigmaSquares(){
+    virtual std::vector<float> inline GetInverseScaleSigmaSquares(){
         return mvInvLevelSigma2;
     }
 
