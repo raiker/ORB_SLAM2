@@ -43,7 +43,7 @@ find_package(Pangolin REQUIRED)
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
-$ENV{HOME}/verilog/fpga-cv/include
+$ENV{HOME}/fpga-cv/include
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
 )
@@ -79,7 +79,7 @@ ${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
 ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
 ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
-$ENV{HOME}/verilog/fpga-cv/lib/libtarsier.a
+$ENV{HOME}/fpga-cv/lib/libtarsier.a
 )
 
 # Build examples
