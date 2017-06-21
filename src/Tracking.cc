@@ -115,14 +115,25 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     int nLevels = fSettings["ORBextractor.nLevels"];
     int fIniThFAST = fSettings["ORBextractor.iniThFAST"];
     int fMinThFAST = fSettings["ORBextractor.minThFAST"];
+	int useTarsier = fSettings["ORBextractor.useTarsier"];
 
-    mpORBextractorLeft = new TarsierExtractor("/dev/tarsier");
+	if (useTarsier) {
+		mpORBextractorLeft = new TarsierExtractor("/dev/tarsier");
 
-    if(sensor==System::STEREO)
-        mpORBextractorRight = new TarsierExtractor("/dev/tarsier");
+		if(sensor==System::STEREO)
+			mpORBextractorRight = new TarsierExtractor("/dev/tarsier");
 
-    if(sensor==System::MONOCULAR)
-        mpIniORBextractor = new TarsierExtractor("/dev/tarsier");
+		if(sensor==System::MONOCULAR)
+			mpIniORBextractor = new TarsierExtractor("/dev/tarsier");
+	} else {
+		mpORBextractorLeft = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+
+		if(sensor==System::STEREO)
+			mpORBextractorRight = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+
+		if(sensor==System::MONOCULAR)
+			mpIniORBextractor = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+	}
 
     cout << endl  << "ORB Extractor Parameters: " << endl;
     cout << "- Number of Features: " << nFeatures << endl;
