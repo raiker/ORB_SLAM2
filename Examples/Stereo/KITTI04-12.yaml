@@ -49,6 +49,7 @@ ORBextractor.nLevels: 8
 # You can lower these values if your images have low contrast			
 ORBextractor.iniThFAST: 12
 ORBextractor.minThFAST: 7
+ORBextractor.useTarsier: 2
 
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters
@@ -56,7 +57,7 @@ ORBextractor.minThFAST: 7
 Viewer.KeyFrameSize: 0.6
 Viewer.KeyFrameLineWidth: 2
 Viewer.GraphLineWidth: 1
-Viewer.PointSize:2
+Viewer.PointSize: 2
 Viewer.CameraSize: 0.7
 Viewer.CameraLineWidth: 3
 Viewer.ViewpointX: 0

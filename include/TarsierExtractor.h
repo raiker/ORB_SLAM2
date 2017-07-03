@@ -4,24 +4,15 @@
 #include <list>
 #include <opencv/cv.h>
 #include <tarsier_common.h>
+#include <soft_tarsier.h>
 
 #include "OrbExtractorBase.h"
 
 namespace ORB_SLAM2
 {
 
-class TarsierExtractor : public OrbExtractorBase {
-protected:
-	Tarsier dev;
+class TarsierExtractorBase : public OrbExtractorBase {
 public:
-	TarsierExtractor(const char * dev_node);
-
-	// Compute the ORB features and descriptors on an image using a Tarsier device.
-    // Mask is ignored in the current implementation.
-	void operator()(cv::InputArray image, cv::InputArray mask,
-		std::vector<cv::KeyPoint>& keypoints,
-		cv::OutputArray descriptors);
-	
 	virtual int GetLevels() {
 		return 9;
 	}
@@ -45,6 +36,30 @@ public:
 	virtual std::vector<float> GetInverseScaleSigmaSquares() {
 		return std::vector<float> {1.0f, 0.64f, 0.4096f, 0.25f, 0.16f, 0.1024f, 0.0625f, 0.04f, 0.0256f};
 	}
+};
+
+class HardTarsierExtractor : public TarsierExtractorBase {
+protected:
+	Tarsier dev;
+public:
+	HardTarsierExtractor(const char * dev_node);
+
+	// Compute the ORB features and descriptors on an image using a Tarsier device.
+    // Mask is ignored in the current implementation.
+	virtual void ProcessImage(cv::InputArray image, cv::InputArray mask,
+		std::vector<cv::KeyPoint>& keypoints,
+		cv::OutputArray descriptors);
+};
+
+class SoftTarsierExtractor : public TarsierExtractorBase {
+public:
+	SoftTarsierExtractor() {}
+
+	// Compute the ORB features and descriptors on an image using a software emulated Tarsier
+    // Mask is ignored in the current implementation.
+	virtual void ProcessImage(cv::InputArray image, cv::InputArray mask,
+		std::vector<cv::KeyPoint>& keypoints,
+		cv::OutputArray descriptors);
 };
 
 }

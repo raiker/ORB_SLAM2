@@ -117,22 +117,41 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     int fMinThFAST = fSettings["ORBextractor.minThFAST"];
 	int useTarsier = fSettings["ORBextractor.useTarsier"];
 
-	if (useTarsier) {
-		mpORBextractorLeft = new TarsierExtractor("/dev/tarsier");
+	switch (useTarsier) {
+		case 0:
+			mpORBextractorLeft = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
 
-		if(sensor==System::STEREO)
-			mpORBextractorRight = new TarsierExtractor("/dev/tarsier");
+			if(sensor==System::STEREO) {
+				mpORBextractorRight = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+			}
 
-		if(sensor==System::MONOCULAR)
-			mpIniORBextractor = new TarsierExtractor("/dev/tarsier");
-	} else {
-		mpORBextractorLeft = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+			if(sensor==System::MONOCULAR) {
+				mpIniORBextractor = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+			}
+			break;
+		case 1:
+			mpORBextractorLeft = new HardTarsierExtractor("/dev/tarsier");
 
-		if(sensor==System::STEREO)
-			mpORBextractorRight = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+			if(sensor==System::STEREO) {
+				mpORBextractorRight = new HardTarsierExtractor("/dev/tarsier");
+			}
 
-		if(sensor==System::MONOCULAR)
-			mpIniORBextractor = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
+			if(sensor==System::MONOCULAR) {
+				mpIniORBextractor = new HardTarsierExtractor("/dev/tarsier");
+			}
+			break;
+		case 2:
+			mpORBextractorLeft = new SoftTarsierExtractor();
+
+			if(sensor==System::STEREO) {
+				mpORBextractorRight = new SoftTarsierExtractor();
+			}
+			if(sensor==System::MONOCULAR) {
+				mpIniORBextractor = new SoftTarsierExtractor();
+			}
+			break;
+		default:
+			throw "Invalid setting for \"useTarsier\"";
 	}
 
     cout << endl  << "ORB Extractor Parameters: " << endl;

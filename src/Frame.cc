@@ -23,6 +23,11 @@
 #include "ORBmatcher.h"
 #include <thread>
 
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <string>
+
 namespace ORB_SLAM2
 {
 
@@ -58,6 +63,28 @@ Frame::Frame(const Frame &frame)
         SetPose(frame.mTcw);
 }
 
+static std::string desc_to_string(std::array<uint8_t, 32> desc) {
+	std::stringstream builder;
+
+	builder << std::setfill('0') << std::hex;
+
+	for (int i = 0; i < 32; i++){
+		builder << std::setw(2) << (uint32_t)desc[i];
+	}
+
+	return std::string(builder.str());
+}
+
+static void dump_features(ofstream &f, vector<cv::KeyPoint> &kps, cv::Mat &dds) {
+	for (uint32_t i = 0; i < kps.size(); i++){
+		auto k = kps[i];
+		auto d = *((std::array<uint8_t, 32>*)dds.ptr(i));
+
+		//printf("(%4u,%4u) [%u] - %s\n", (uint32_t)k.pt.x, (uint32_t)k.pt.y, k.octave, desc_to_string(d).c_str());
+		f << "(" << setw(4) << (uint32_t)k.pt.x << "," << setw(4) << (uint32_t)k.pt.y << ") ";
+		f << "[" << k.octave << "] - " << desc_to_string(d).c_str() << endl;
+	}
+}
 
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, OrbExtractorBase* extractorLeft, OrbExtractorBase* extractorRight, ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth)
     :mpORBvocabulary(voc),mpORBextractorLeft(extractorLeft),mpORBextractorRight(extractorRight), mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth),
@@ -80,6 +107,21 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
     thread threadRight(&Frame::ExtractORB,this,1,imRight);
     threadLeft.join();
     threadRight.join();
+
+	//cout << "Threads joined" << endl;
+	
+	if (mnId == 0) {
+		//dump features to file
+		
+		cout << mvKeys.size() << " " << mDescriptors.size() << endl;
+		cout << mvKeysRight.size() << " " << mDescriptorsRight.size() << endl;
+
+		ofstream fleft("features_left.txt");
+		ofstream fright("features_right.txt");
+
+		dump_features(fleft, mvKeys, mDescriptors);
+		dump_features(fright, mvKeysRight, mDescriptorsRight);
+	}
 
     N = mvKeys.size();
 
@@ -248,9 +290,9 @@ void Frame::AssignFeaturesToGrid()
 void Frame::ExtractORB(int flag, const cv::Mat &im)
 {
     if(flag==0)
-        (*mpORBextractorLeft)(im,cv::Mat(),mvKeys,mDescriptors);
+        mpORBextractorLeft->ProcessImage(im,cv::Mat(),mvKeys,mDescriptors);
     else
-        (*mpORBextractorRight)(im,cv::Mat(),mvKeysRight,mDescriptorsRight);
+        mpORBextractorRight->ProcessImage(im,cv::Mat(),mvKeysRight,mDescriptorsRight);
 }
 
 void Frame::SetPose(cv::Mat Tcw)
@@ -485,14 +527,17 @@ void Frame::ComputeStereoMatches()
 
     for(int iR=0; iR<Nr; iR++)
     {
+		//cout << "iR=" << iR << endl;
         const cv::KeyPoint &kp = mvKeysRight[iR];
         const float &kpY = kp.pt.y;
         const float r = 2.0f*mvScaleFactors[mvKeysRight[iR].octave];
         const int maxr = ceil(kpY+r);
         const int minr = floor(kpY-r);
 
-        for(int yi=minr;yi<=maxr;yi++)
+        for(int yi=minr;yi<=maxr;yi++) {
+			//cout << "\t" << yi << endl;
             vRowIndices[yi].push_back(iR);
+		}
     }
 
     // Set limits for search
