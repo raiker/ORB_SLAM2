@@ -21,4 +21,5 @@ Vocabulary/ORBvoc.txt
 build/
 *~
 lib/
-
+features_left.txt
+features_right.txt

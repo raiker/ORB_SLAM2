@@ -7,21 +7,7 @@
 #include "TarsierExtractor.h"
 
 namespace ORB_SLAM2 {
-	TarsierExtractor::TarsierExtractor(const char * dev_node) :
-		dev(dev_node)
-	{}
-
-    // Mask is ignored
-	void TarsierExtractor::operator()(cv::InputArray image, cv::InputArray mask,
-		std::vector<cv::KeyPoint>& keypoints,
-		cv::OutputArray descriptors)
-	{
-		//transmute the pixels into an ImgData struct
-		if(image.empty()){
-			return;
-		}
-
-		cv::Mat image_matrix = image.getMat();
+	static std::vector<uint8_t> vec_from_mat(cv::Mat &image_matrix) {
 		assert(image_matrix.type() == CV_8UC1);
 
 		cv::Size size = image_matrix.size();
@@ -37,6 +23,27 @@ namespace ORB_SLAM2 {
 
 			pixels.insert(pixels.end(), src_ptr, src_ptr + size.width);
 		}
+
+		return pixels;
+	}
+
+	HardTarsierExtractor::HardTarsierExtractor(const char * dev_node) :
+		dev(dev_node)
+	{}
+
+    // Mask is ignored
+	void HardTarsierExtractor::ProcessImage(cv::InputArray image, cv::InputArray mask,
+		std::vector<cv::KeyPoint>& keypoints,
+		cv::OutputArray descriptors)
+	{
+		//transmute the pixels into an ImgData struct
+		if(image.empty()){
+			return;
+		}
+
+		cv::Mat image_matrix = image.getMat();
+		
+		std::vector<uint8_t> pixels = vec_from_mat(image_matrix);
 
 		assert(pixels.size() == image_matrix.size().width * image_matrix.size().height);
 
@@ -63,5 +70,38 @@ namespace ORB_SLAM2 {
 			//copy descriptor bytes
 			std::copy(feature.orb_descriptor_chunks, feature.orb_descriptor_chunks + 32, descriptors.getMat().ptr(i));
 		}
+	}
+
+	void SoftTarsierExtractor::ProcessImage(cv::InputArray image, cv::InputArray mask,
+		std::vector<cv::KeyPoint>& keypoints,
+		cv::OutputArray descriptors)
+	{
+		if(image.empty()){
+			return;
+		}
+
+		cv::Mat image_matrix = image.getMat();
+		std::vector<uint8_t> pixels = vec_from_mat(image_matrix);
+		assert(pixels.size() == image_matrix.size().width * image_matrix.size().height);
+
+		soft_tarsier::ResultSet * results = soft_tarsier::get_features(&pixels[0], image_matrix.size().width, image_matrix.size().height);
+
+		uint32_t num_features = soft_tarsier::get_num_features(results);
+		//std::cout << num_features << std::endl;
+		
+		keypoints.clear();
+		keypoints.resize(num_features);
+		descriptors.create(num_features, 32, CV_8U);
+
+		assert(sizeof(cv::KeyPoint) == 28);
+		assert(sizeof(soft_tarsier::ORBDescriptor) == 32);
+
+		soft_tarsier::fill_arrays_and_drop(results, &keypoints[0], reinterpret_cast<soft_tarsier::ORBDescriptor*>(descriptors.getMat().ptr(0)));
+
+		/*for (int i = 0; i < 24; i++){
+			auto &kp = keypoints[i];
+
+			std::cout << kp.pt.x << " " << kp.pt.y << std::endl;
+		}*/
 	}
 }

@@ -8,7 +8,7 @@ namespace ORB_SLAM2
 
 class OrbExtractorBase {
 public:
-	virtual void operator()(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors) = 0;
+	virtual void ProcessImage(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors) = 0;
 
 	virtual int GetLevels() = 0;
 
