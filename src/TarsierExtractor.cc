@@ -27,8 +27,8 @@ namespace ORB_SLAM2 {
 		return pixels;
 	}
 
-	HardTarsierExtractor::HardTarsierExtractor(const char * dev_node) :
-		dev(dev_node)
+	HardTarsierExtractor::HardTarsierExtractor(const char * dev_node, int16_t threshold) :
+		dev(dev_node), threshold(threshold)
 	{}
 
     // Mask is ignored
@@ -49,7 +49,7 @@ namespace ORB_SLAM2 {
 
 		ImgData frame(image_matrix.size().width, image_matrix.size().height, std::move(pixels));
 
-		std::vector<feature_descriptor> output_features = dev.get_image_features(frame);
+		std::vector<feature_descriptor> output_features = dev.get_image_features(frame, threshold);
 
 		keypoints.clear();
 		descriptors.create(output_features.size(), 32, CV_8U);
@@ -84,7 +84,7 @@ namespace ORB_SLAM2 {
 		std::vector<uint8_t> pixels = vec_from_mat(image_matrix);
 		assert(pixels.size() == image_matrix.size().width * image_matrix.size().height);
 
-		soft_tarsier::ResultSet * results = soft_tarsier::get_features(&pixels[0], image_matrix.size().width, image_matrix.size().height);
+		soft_tarsier::ResultSet * results = soft_tarsier::get_features(&pixels[0], image_matrix.size().width, image_matrix.size().height, threshold);
 
 		uint32_t num_features = soft_tarsier::get_num_features(results);
 		//std::cout << num_features << std::endl;

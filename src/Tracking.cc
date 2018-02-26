@@ -116,6 +116,7 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     int fIniThFAST = fSettings["ORBextractor.iniThFAST"];
     int fMinThFAST = fSettings["ORBextractor.minThFAST"];
 	int useTarsier = fSettings["ORBextractor.useTarsier"];
+    int tarsierThreshold = fSettings["ORBextractor.tarsierThreshold"];
 
 	switch (useTarsier) {
 		case 0:
@@ -130,24 +131,24 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
 			}
 			break;
 		case 1:
-			mpORBextractorLeft = new HardTarsierExtractor("/dev/tarsier");
+			mpORBextractorLeft = new HardTarsierExtractor("/dev/tarsier", tarsierThreshold);
 
 			if(sensor==System::STEREO) {
-				mpORBextractorRight = new HardTarsierExtractor("/dev/tarsier");
+				mpORBextractorRight = new HardTarsierExtractor("/dev/tarsier", tarsierThreshold);
 			}
 
 			if(sensor==System::MONOCULAR) {
-				mpIniORBextractor = new HardTarsierExtractor("/dev/tarsier");
+				mpIniORBextractor = new HardTarsierExtractor("/dev/tarsier", tarsierThreshold);
 			}
 			break;
 		case 2:
-			mpORBextractorLeft = new SoftTarsierExtractor();
+			mpORBextractorLeft = new SoftTarsierExtractor(tarsierThreshold);
 
 			if(sensor==System::STEREO) {
-				mpORBextractorRight = new SoftTarsierExtractor();
+				mpORBextractorRight = new SoftTarsierExtractor(tarsierThreshold);
 			}
 			if(sensor==System::MONOCULAR) {
-				mpIniORBextractor = new SoftTarsierExtractor();
+				mpIniORBextractor = new SoftTarsierExtractor(tarsierThreshold);
 			}
 			break;
 		default:

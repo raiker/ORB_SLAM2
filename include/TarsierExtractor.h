@@ -41,8 +41,9 @@ public:
 class HardTarsierExtractor : public TarsierExtractorBase {
 protected:
 	Tarsier dev;
+	int16_t threshold;
 public:
-	HardTarsierExtractor(const char * dev_node);
+	HardTarsierExtractor(const char * dev_node, int16_t threshold);
 
 	// Compute the ORB features and descriptors on an image using a Tarsier device.
     // Mask is ignored in the current implementation.
@@ -52,8 +53,10 @@ public:
 };
 
 class SoftTarsierExtractor : public TarsierExtractorBase {
+private:
+	int16_t threshold;
 public:
-	SoftTarsierExtractor() {}
+	SoftTarsierExtractor(int16_t threshold) : threshold(threshold) {}
 
 	// Compute the ORB features and descriptors on an image using a software emulated Tarsier
     // Mask is ignored in the current implementation.

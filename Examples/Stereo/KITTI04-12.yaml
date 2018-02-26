@@ -49,7 +49,10 @@ ORBextractor.nLevels: 8
 # You can lower these values if your images have low contrast			
 ORBextractor.iniThFAST: 12
 ORBextractor.minThFAST: 7
-ORBextractor.useTarsier: 2
+
+# Tarsier settings
+ORBextractor.useTarsier: 1
+ORBextractor.tarsierThreshold: 200
 
 #--------------------------------------------------------------------------------------------
 # Viewer Parameters
